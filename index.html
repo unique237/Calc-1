@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sleek Calculator</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            background: linear-gradient(to bottom right, #1e3a8a, #3b82f6);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+        }
+        .calculator {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 1rem;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 320px;
+        }
+        .display {
+            background: #f3f4f6;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            text-align: right;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+        }
+        button {
+            padding: 1rem;
+            font-size: 1.25rem;
+            border: none;
+            border-radius: 0.5rem;
+            background: #e5e7eb;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+        }
+        button:hover {
+            background: #d1d5db;
+        }
+        button:active {
+            transform: scale(0.95);
+        }
+        .operator {
+            background: #3b82f6;
+            color: white;
+        }
+        .operator:hover {
+            background: #2563eb;
+        }
+        .equals {
+            background: #22c55e;
+            color: white;
+        }
+        .equals:hover {
+            background: #16a34a;
+        }
+        .clear {
+            background: #ef4444;
+            color: white;
+        }
+        .clear:hover {
+            background: #dc2626;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <div class="display" id="display">0</div>
+        <div class="buttons">
+            <button class="clear" data-action="clear">C</button>
+            <button data-value="(">(</button>
+            <button data-value=")">)</button>
+            <button class="operator" data-value="/">÷</button>
+            <button data-value="7">7</button>
+            <button data-value="8">8</button>
+            <button data-value="9">9</button>
+            <button class="operator" data-value="*">×</button>
+            <button data-value="4">4</button>
+            <button data-value="5">5</button>
+            <button data-value="6">6</button>
+            <button class="operator" data-value="-">-</button>
+            <button data-value="1">1</button>
+            <button data-value="2">2</button>
+            <button data-value="3">3</button>
+            <button class="operator" data-value="+">+</button>
+            <button data-value="0">0</button>
+            <button data-value=".">.</button>
+            <button data-action="delete">⌫</button>
+            <button class="equals" data-action="calculate">=</button>
+        </div>
+    </div>
+    <script>
+        $(document).ready(function() {
+            const $display = $('#display');
+
+            // Handle button clicks
+            $('.buttons button').click(function() {
+                const value = $(this).data('value');
+                const action = $(this).data('action');
+
+                if (action === 'clear') {
+                    $display.text('0');
+                } else if (action === 'delete') {
+                    let current = $display.text();
+                    $display.text(current.length > 1 ? current.slice(0, -1) : '0');
+                } else if (action === 'calculate') {
+                    try {
+                        let expression = $display.text()
+                            .replace(/÷/g, '/')
+                            .replace(/×/g, '*');
+                        if (/^[0-9+\-*/().\s]+$/.test(expression)) {
+                            let result = eval(expression);
+                            if (result === Infinity || result === -Infinity) {
+                                $display.text('Error: Div by 0');
+                            } else if (isNaN(result)) {
+                                $display.text('Error');
+                            } else {
+                                $display.text(Number(result.toFixed(8)));
+                            }
+                        } else {
+                            $display.text('Error');
+                        }
+                    } catch (e) {
+                        $display.text('Error');
+                    }
+                } else {
+                    if ($display.text() === '0' && value !== '.') {
+                        $display.text(value);
+                    } else {
+                        $display.text($display.text() + value);
+                    }
+                }
+            });
+
+            // Keyboard input support
+            $(document).keydown(function(event) {
+                const key = event.key;
+                if (/[0-9]/.test(key)) {
+                    $('.buttons button[data-value="' + key + '"]').click();
+                } else if (key === '.') {
+                    $('.buttons button[data-value="."]').click();
+                } else if (key === '+') {
+                    $('.buttons button[data-value="+"]').click();
+                } else if (key === '-') {
+                    $('.buttons button[data-value="-"]').click();
+                } else if (key === '*') {
+                    $('.buttons button[data-value="*"]').click();
+                } else if (key === '/') {
+                    $('.buttons button[data-value="/"]').click();
+                } else if (key === '(' || key === ')') {
+                    $('.buttons button[data-value="' + key + '"]').click();
+                } else if (key === 'Enter') {
+                    $('.buttons button[data-action="calculate"]').click();
+                } else if (key === 'Backspace') {
+                    $('.buttons button[data-action="delete"]').click();
+                } else if (key === 'Escape') {
+                    $('.buttons button[data-action="clear"]').click();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
